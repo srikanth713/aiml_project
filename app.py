@@ -2,20 +2,16 @@ from fastapi import FastAPI
 import numpy as np
 import joblib
 
+from schemas import InputData   # 👈 import from new file
+
 app = FastAPI()
 
-# Load model
-model = joblib.load("energy_model.joblib")
-
-@app.get("/")
-def home():
-    return {"message": "API Running"}
+model = joblib.load("smart_home_energy_model.joblib")
 
 @app.post("/predict")
-def predict(temperature: float, humidity: float, hour: float, appliances: float):
+def predict(data: InputData):
+    input_data = np.array([[data.temperature, data.humidity, data.hour]])
     
-    data = np.array([[temperature, humidity, hour, appliances]])
+    result = model.predict(input_data)
     
-    prediction = model.predict(data)
-    
-    return {"predicted_energy": float(prediction[0])}
+    return {"predicted_energy": float(result[0])}
